@@ -104,17 +104,18 @@ def count_claimed_by(db_path, claimer):
 
 
 def category_stats(db_path):
-    """各類別的物品件數與待認領件數；沒有物品的類別也要列出（LEFT JOIN）。"""
+    """各類別的物品件數與待認領件數；沒有物品的類別也要列出 (LEFT JOIN)。"""
     conn = sqlite3.connect(db_path)
     try:
         rows = conn.execute("""
             SELECT c.name,
                    COUNT(i.id),
-                   COUNT(CASE WHEN i.status = '待認領' THEN 1 END)
+                   COUNT(CASE WHEN i.status = '待認領' THEN 1 END),
+                   COUNT(CASE WHEN i.status = '已認領' THEN 1 END)
             FROM categories c
             LEFT JOIN items i ON i.category = c.name
             GROUP BY c.name
             ORDER BY c.rowid""").fetchall()
     finally:
         conn.close()
-    return [{"類別": r[0], "總件數": r[1], "待認領": r[2]} for r in rows]
+    return [{"類別": r[0], "總件數": r[1], "待認領": r[2], "已認領": r[3]} for r in rows]
